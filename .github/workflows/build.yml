@@ -1,0 +1,50 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  host-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install platformio
+      - name: Fetch libraries
+        run: pio pkg install -e cores3
+      - name: Unit tests
+        run: sim/run_selftest.sh
+      - name: Simulator builds
+        run: make -C sim -j"$(nproc)"
+
+  firmware:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [cores3, cores3-tls13, tab5]
+    env:
+      PLATFORMIO_CORE_DIR: ${{ github.workspace }}/.pio-core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: .pio-core
+          key: pio-${{ matrix.env }}-${{ hashFiles('platformio.ini') }}
+      - run: pip install platformio
+      - run: pio run -e ${{ matrix.env }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.env }}
+          path: dist/*.bin

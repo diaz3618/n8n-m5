@@ -1,0 +1,4 @@
+include/lv_conf.h
+src/ui/logo_data.h
+src/core/routes_data.h
+sim/

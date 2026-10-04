@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [cores3, cores3-tls13, tab5]
+    env:
+      PLATFORMIO_CORE_DIR: ${{ github.workspace }}/.pio-core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install platformio
+      - run: pio run -e ${{ matrix.env }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.env }}
+          path: dist/*.bin
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        run: cd dist && sha256sum *.bin > SHA256SUMS
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

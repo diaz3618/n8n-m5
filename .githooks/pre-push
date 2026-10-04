@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Runs the host-side unit tests when libraries are already fetched (pio pkg install -e cores3)
+cd "$(git rev-parse --show-toplevel)"
+[ -d .pio/libdeps/cores3/ArduinoJson ] || exit 0
+sim/run_selftest.sh

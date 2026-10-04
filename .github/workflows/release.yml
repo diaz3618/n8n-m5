@@ -22,7 +22,7 @@ jobs:
           python-version: "3.12"
       - run: pip install platformio
       - run: pio run -e ${{ matrix.env }}
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: firmware-${{ matrix.env }}
           path: dist/*.bin
@@ -43,7 +43,7 @@ jobs:
           pio pkg install -e tab5-tls13
           scripts/setup_tab5_core.sh
       - run: PLATFORMIO_CORE_DIR=$HOME/.platformio-n8n-tab5-tls13 pio run -e tab5-tls13
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: firmware-tab5-tls13
           path: dist/*.bin

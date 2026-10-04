@@ -48,3 +48,24 @@ jobs:
         with:
           name: firmware-${{ matrix.env }}
           path: dist/*.bin
+
+  tab5-tls13:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - run: pip install platformio
+      - name: Fetch scons from the plain Tab5 platform
+        run: PLATFORMIO_CORE_DIR=$HOME/.platformio-n8n-tab5 pio pkg install -e tab5
+      - name: Prepare the TLS 1.3 platform
+        run: |
+          export PLATFORMIO_CORE_DIR=$HOME/.platformio-n8n-tab5-tls13
+          pio pkg install -e tab5-tls13
+          scripts/setup_tab5_core.sh
+      - run: PLATFORMIO_CORE_DIR=$HOME/.platformio-n8n-tab5-tls13 pio run -e tab5-tls13
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: firmware-tab5-tls13
+          path: dist/*.bin
